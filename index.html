@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+
+	<title>Talk | SFNode, May, 2017 | Numeric Computing with Node.js</title>
+
+	<meta name="description" content="Node.js and number crunching may seem an odd pair, but this is rapidly changing. In this talk, I discuss the current state-of-the-art for numeric computation in Node.js and highlight emerging technologies and libraries for analysis and machine learning. I discuss what to look for in numeric computing libraries, common implementation mistakes, and how to avoid portability issues. And I conclude by explaining why Node.js is poised to become the next big thing for data science and numeric computation.">
+	<meta name="author" content="Athan Reines">
+
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+	<!-- Icons -->
+	<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+	<link rel="manifest" href="manifest.json">
+	<link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
+	<meta name="theme-color" content="#ffffff">
+
+	<!-- Facebook Open Graph -->
+	<meta property="og:type" content="website">
+	<meta property="og:site_name" content="stdlib">
+	<meta property="og:url" content="http://stdlib.io/">
+	<meta property="og:title" content="A standard library for JavaScript and Node.js.">
+	<meta property="og:description" content="stdlib is a standard library for JavaScript and Node.js, with an emphasis on numeric computing.">
+	<meta property="og:locale" content="en_US">
+	<meta property="og:image" content="">
+
+	<!-- Twitter -->
+	<meta name="twitter:card" content="A standard library for JavaScript and Node.js.">
+	<meta name="twitter:site" content="@stdlib">
+	<meta name="twitter:url" content="http://stdlib.io/">
+	<meta name="twitter:title" content="stdlib">
+	<meta name="twitter:description" content="stdlib is a standard library for JavaScript and Node.js, with an emphasis on numeric computing.">
+	<meta name="twitter:image" content="">
+
+	<!-- Stylesheets -->
+	<link rel="stylesheet" href="css/grid.css">
+	<link rel="stylesheet" href="css/font-awesome.css">
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/white.css">
+	<link rel="stylesheet" href="css/style.css">
+
+	<!-- Code syntax highlighting -->
+	<link rel="stylesheet" href="css/code/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script src="js/lib/reveal/pdf.js"></script>
+
+	<!--[if lt IE 9]>
+	<script src="js/lib/reveal/html5shiv.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+
+	<header>
+		<a href="https://github.com/stdlib-js/stdlib"><img src="img/long_logo_white.svg" alt="stdlib"></a>
+	</header>
+
+	<div class="reveal">
+
+		<!-- Any section element inside of this container is displayed as a slide -->
+		<div class="slides">
+			<section id="splash" class="center" data-transition="fade-out">
+				<div>
+					<a href="https://github.com/stdlib-js/stdlib"><img src="img/long_logo_white.svg" alt="stdlib" class="undecorated" height="35%" width="35%"></a>
+				</div>
+				<div>
+					<small><a href="https://github.com/kgryte"><i class="fa fa-github"></i> Athan Reines</a> | <a href="https://twitter.com/kgryte"><i class="fa fa-twitter"></i> @kgryte</a> | <a href="https://twitter.com/stdlibjs"><i class="fa fa-twitter"></i> @stdlibjs</a></small>
+				</div>
+				<!-- <div>
+					<a href="https://github.com/stdlib-js/stdlib"><img src="img/hex_sticker_black.svg" alt="stdlib" class="undecorated"></a>
+				</div> -->
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section id="title-slide" class="center">
+				<h1>Numeric Computing with Node.js</h1>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="center">
+				<h2 class="no-text-transform">Survey</h2>
+
+				<aside class="notes">
+					<ul>
+						<li>Who here has done what she or he considers numeric computing? e.g., machine learning, clustering, statistical analysis, data analysis, natural language processing, and every other buzz word and topic related to numbers?</li>
+						<li>Who here has used Python? R? Julia? MATLAB? Mathematica?</li>
+						<li>Who here has used JavaScript for anything?</li>
+						<li>Who here has used JavaScript for numeric computing?</li>
+					</ul>
+				</aside>
+			</section>
+
+			<section class="center">
+				<h2 class="no-text-transform">Overview</h2>
+
+				<div class="row">
+					<ul class="column column-3">
+						&nbsp;
+					</ul>
+					<ol class="column column-8">
+						<li class="fragment">Why JavaScript?</li>
+						<li class="fragment">State of JavaScript</li>
+						<li class="fragment">State of Ecosystem</li>
+						<li class="fragment">A Standard Library</li>
+						<li class="fragment">The Future</li>
+					</ol>
+				</div>
+
+				<aside class="notes">
+					<p>
+						Going to be a roller coaster of sorts. It will be an emotional journey, but a journey which ends on a positive note and leaves you feeling good about the future! So bear with me. :)
+					</p>
+					<p>
+						First, I am going to motivate why you should care about numeric computing in JavaScript. :)
+					</p>
+					<p>
+						Next, I'll talk about the State of Math in JavaScript. :(
+					</p>
+					<p>
+						Then, I'll discuss the JavaScript numeric computing ecosystem. :|
+					</p>
+					<p>
+						I'll follow by talking about a project in which I am involved which seeks to drive the conversation forward. :)
+					</p>
+					<p>
+						And I'll end by telling you how you can get involved in the JavaScript computing revolution. :)
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="slide-in fade-out" data-transition-speed="fast">
+				<h2 class="no-text-transform">JavaScript</h2>
+
+				<aside class="notes">
+					<p>
+						First, let's talk about JavaScript.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="none">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="zoom-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Language of the Web</h2>
+
+				<aside class="notes">
+					<p>
+						JavaScript is THE language of the web, whether you like it or not.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="none fade-out" data-transition-speed="fast">
+				<div class=" fragment row">
+					<pre><code class="hljs javascript" contenteditable>
+import beep, { foo, bar } from 'beep';
+import beep from 'beep';
+import { foo, bar } from 'beep';
+import { foo as fu, bar } from 'beep';
+import * as beep from 'beep';
+import 'beep';
+					</code></pre>
+				</div>
+				<div class="fragment row">
+					<pre><code class="hljs javascript" contenteditable>
+const beep = require( 'beep' );
+					</code></pre>
+				</div>
+
+				<aside class="notes">
+					<p>
+						Depending on your bent, it has flaws (cue example flaw) and, depending on your bent, it has positive qualities (cue example trait).
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="none fade-out" data-transition-speed="fast">
+				<div class="fragment">
+					<div class="row">
+						<p class="column column-2">&nbsp;</p>
+						<p class="column column-4">
+							MATLAB
+						</p>
+						<p class="column column-4">
+							R
+						</p>
+					</div>
+					<div class="row">
+						<p class="column column-2">&nbsp;</p>
+						<p class="column column-4">
+							Python
+						</p>
+						<p class="column column-4">
+							Mathematica
+						</p>
+					</div>
+					<div class="row">
+						<p class="column column-2">&nbsp;</p>
+						<p class="column column-4">
+							Julia
+						</p>
+					</div>
+				</div>
+				<aside class="notes">
+					<p>
+						When people think numeric computing and, in particular, what language they want to use for numeric computing, JavaScript is NOT the first to mind. Instead, people think MATLAB, R, Python, Mathematica, and more recently Julia. But not JavaScript.
+					</p>
+			</section>
+
+			<section class="center" data-transition="none">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="zoom-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Why?</h2>
+
+				<aside class="notes">
+					<p>
+						Why?
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="slide-in fade-out">
+
+				<ul>
+					<li class="fragment">Dynamically compiled</li>
+					<li class="fragment">U/Int64</li>
+ 					<li class="fragment">BigInt/BigNumber</li>
+					<li class="fragment">Single-threaded</li>
+ 					<li class="fragment">Performance</li>
+					<li class="fragment">C/C++/Fortran bindings</li>
+				</ul>
+
+				<aside class="notes">
+					<ul>
+						<li>
+							Dynamically compiled: so are R, Python, Julia, etc.
+						</li>
+						<li>
+     						Int64: but neither does R (https://www.r-bloggers.com/r-in-a-64-bit-world/; requires 3rd party package); in Python v2, had a "long" type (arbitrary-precision integer, which depending on how implemented can be a bit slower than dedicated machine types), which is now true for all integers in Python v3
+     					</li>
+     					<li>
+							No native BigInt/BigNumber support: neither does R (need to use a package), MATLAB requires a toolbox, Python uses arbitrary-precision integers
+						</li>
+						<li>
+     						Single-threaded: so is R
+     					</li>
+     					<li>
+							Perf: R is notoriously "slow" (slow being a relative term); JavaScript is faster (cue a couple benchmarks)
+						</li>
+						<li>
+							C/C++/Fortran bindings: Node.js native add-ons and WebAssembly
+						</li>
+					</ul>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="none">
+				<aside class="notes">
+					Other reasons are more substantive and include...
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in" data-transition-speed="default">
+				<h2 class="no-text-transform">Community.</h2>
+
+				<aside class="notes">
+					<p>
+						Community size. In terms of community and ecosystem, JavaScript is huge; however, the community of people doing interesting things in numeric computing with JavaScript is small.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="none">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in" data-transition-speed="default">
+				<h2 class="no-text-transform">Libraries.</h2>
+
+				<aside class="notes">
+					<p>
+						Libraries: lack of comparable libraries (e.g., NumPy for JavaScript does not exist). This is a fair criticism.
+					</p>
+					<p>
+						Lack of libraries may be a reason to not <em>use</em> JavaScript for a particular application requiring such libraries here and now; however, this does not preclude us from creating those libraries so that future applications are not limited by a lack of available libraries in the first place.
+					</p>
+					<p>
+						But...what about first mover advantage? Those libs took years to develop and optimize? True. However, people working on this now have "last" mover advantage. The R&amp;D has been done. Bringing to JavaScript is a matter of putting in the time and effort to read, understand, and implement comparable implementations. Not a piece of cake, but also not a herculean challenge.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="none">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="zoom-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Why?</h2>
+
+				<aside class="notes">
+					<p>
+						So why would we want to create those libraries, when those libraries already exist on other platforms?
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="none fade-out">
+
+				<ul>
+					<li class="fragment">Web APIs</li>
+					<li class="fragment">Rendering</li>
+ 					<li class="fragment">Visualization/Computation</li>
+					<li class="fragment">Ubiquity</li>
+ 					<li class="fragment">Distribution</li>
+					<li class="fragment">Package Management</li>
+				</ul>
+
+				<aside class="notes">
+					<ul>
+						<li>
+							Ability to easily use web APIs (include hardware APIs)
+						</li>
+						<li>
+							More easily leverage browser rendering capabilities (SVG, canvas, WebGL)
+						</li>
+						<li>
+							Tighter coupling between visualization and computation
+						</li>
+						<li>
+							Ubiquity (can run anywhere and everywhere; every fortune 500; nearly every smartphone device has a browser; increasingly IoT)
+						</li>
+						<li>
+							Distribution (can be as easy as providing a link)
+						</li>
+						<li>
+							Package management: more or less Node and npm got things right
+						</li>
+					</ul>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="none">
+				<aside class="notes">
+					But there's more...
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in" data-transition-speed="fast">
+				<h2 class="no-text-transform">Applications</h2>
+				<aside class="notes">
+					Applications.
+				</aside>
+			</section>
+
+			<section class="center" data-transition="slide-in fade-out">
+				<ul>
+					<li class="fragment">Edge Computing</li>
+					<li class="fragment">Cross-platform</li>
+ 					<li class="fragment">Compute Intensive</li>
+ 					<li class="fragment">Interactive Data Analysis</li>
+					<li class="fragment">Integrated ML</li>
+ 					<li class="fragment">AI Powered</li>
+				</ul>
+
+				<aside class="notes">
+					<ul>
+						<li>
+							"edge" computing: why run compute jobs on your servers when a client's machine can do the job just as easily and at lower cost
+						</li>
+						<li>
+							work in the browser, on mobile, and on the desktop via Electron
+						</li>
+						<li>
+							compute intensive client applications (e.g., autocad, molecular modeling, image analysis)
+						</li>
+						<li>
+							interactive data analysis applications (e.g., sampling, filtering, feature identification and extraction)
+						</li>
+						<li>
+							applications with integrated machine learning (speech recognition and dictation)
+						</li>
+						<li>
+							AI client applications (e.g., image tracking, augmented realty)
+						</li>
+					</ul>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="none">
+				<aside class="notes">
+					And lastly...
+				</aside>
+			</section>
+
+			<section class="center" data-transition="zoom-in" data-transition-speed="default">
+				<h2 class="no-text-transform">Mad science.</h2>
+
+				<aside class="notes">
+					Peer-to-peer serverless grid-computing over WebRTC.
+				</aside>
+			</section>
+
+			<section class="center" data-transition="none">
+				<aside class="notes">
+					Hopefully, your interest is piqued and you are at least sympathetic as to why you should care about numeric computing in JavaScript.
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">State of Math in JavaScript</h2>
+
+				<aside class="notes">
+					So, at the most basic level, what is the state of math in JavaScript? Not great. :(
+				</aside>
+			</section>
+
+			<section class="center">
+				<div class="fragment row">
+					<ul class="column column-3">
+						<li>acos</li>
+						<li>asin</li>
+						<li>atan</li>
+						<li>atan2</li>
+						<li>cos</li>
+						<li>sin</li>
+						<li>tan</li>
+						<li>acosh</li>
+						<li>asinh</li>
+						<li>atanh</li>
+						<li>cosh</li>
+						<li>sinh</li>
+						<li>tanh</li>
+					</ul>
+					<ul class="column column-3">
+						<li>abs</li>
+						<li>exp</li>
+						<li>log (ln)</li>
+						<li>pow</li>
+						<li>sqrt</li>
+						<li>sign</li>
+						<li>cbrt</li>
+						<li>expm1</li>
+						<li>log10</li>
+						<li>log1p</li>
+						<li>log2</li>
+					</ul>
+					<ul class="column column-3">
+						<li>ceil</li>
+						<li>floor</li>
+						<li>round</li>
+						<li>fround</li>
+						<li>trunc</li>
+					</ul>
+					<ul class="column column-2">
+						<li>max</li>
+						<li>min</li>
+						<li>random</li>
+						<li>hypot</li>
+						<li>clz32</li>
+						<li>imul</li>
+					</ul>
+				</div>
+
+				<aside class="notes">
+					<p>
+						In ES5, the standard math library consisted of 18 functions and 8 constants. These functions can be categorized as trigonometric, other special functions, including rounding, and miscellaneous, including a PRNG.
+					</p>
+					<p>
+						ES2015/ES6 added 17 more functions to the standard math library. Again, these functions are broken down into trigonometric, other special functions, including rounding, and miscellaneous.
+					</p>
+					<p>
+						The addition of these 17 functions means the JavaScript standard math library has 35 functions.
+					</p>
+					<p>
+						In short, the JavaScript standard math library is quite small, especially when compared to other languages and dedicated numeric computing environments.
+					</p>
+					<p>
+						In comparison, the Golang standard math library has 54 functions (JS has 35), 8+ PRNGs, as well as support for 64-bit and 128-bit complex numbers. Notably, Golang has equivalents for most C/C++ standard math library functions.
+					</p>
+					<p>
+						Besides being small, the JavaScript standard math library has other problems.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<ul>
+					<li class="fragment">No standard algorithms.</li>
+					<li class="fragment">No minimum precision.</li>
+ 					<li class="fragment">Portability.</li>
+ 					<li class="fragment">No common codebase.</li>
+					<li class="fragment">Slow pace of innovation.</li>
+ 					<li class="fragment">Bugs.</li>
+				</ul>
+
+				<aside class="notes">
+					<ul>
+						<li>
+							ECMA-262 does not specify particular math algorithms (only recommends); hence implementors are free to choose algos according to speed/precision trade-offs.
+						</li>
+						<li>
+							ECMA-262 does not require a minimum precision; hence, no guarantee that a given JavaScript environment has a precise implementation.
+						</li>
+						<li>
+							Portability is non-existent for numeric computing applications due to potential cross-browser variability and potential variability from one browser version to the next.
+						</li>
+						<li>
+							No common codebase, so resolving issues takes considerable time and effort, especially when different vendors use varying implementations in varying languages with varying organization and structure.
+						</li>
+						<li>
+							Specification-level changes require cross-browser vendor consensus, causing the pace of innovation at the standards level to be slow (e.g., U/Int64 support has been on the table, off the table for more than a decade, and is most recently on the table as part of a BigInt proposal).
+						</li>
+						<li>
+							Bugs are common (cue bug or two; e.g., `pow`).
+						</li>
+					</ul>
+				</aside>
+			</section>
+
+			<section class="center">
+				<h2 class="no-text-transform">Math.pow</h2>
+
+				<pre><code class="hljs javascript" contenteditable>
+var x = Math.pow( 10, 308 );
+// returns:  1.0000000000000006e+308
+// expected: 1.0e+308
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Node v0.10+.
+					</p>
+					<p>
+						Admittedly, the error is only 3 ulp; however, those 3 ulp matter. Inaccurate results for integer inputs a) is counterintuitive because 10**308 is representable as a double (so not the same counterintuitive as 0.1 + 0.2 != 0.3) and b) ends up causing downstream accuracy issues for higher order mathematical functions as we discovered while writing such functions.
+					</p>
+					<p>
+						See V8 issues <a href="https://bugs.chromium.org/p/v8/issues/detail?id=3599">3599</a> and <a href="https://bugs.chromium.org/p/v8/issues/detail?id=5157">5157</a>.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<h2 class="no-text-transform">Math.exp</h2>
+				<pre><code class="hljs javascript" contenteditable>
+var y = Math.exp( 100.0 );
+// returns:  2.6881171418161485e+43
+// expected: 2.6881171418161356e+43
+				</code></pre>
+
+				<aside class="notes">
+					<p>
+						Node v0.12, v4, v6.
+					</p>
+					<p>
+						Error of 26 ulp. For many values, Math.exp returns inaccurate results. Regression in Node v0.12. Fixed in Node v7.
+					</p>
+					<p>
+						See V8 issue <a href="https://bugs.chromium.org/p/v8/issues/detail?id=3468">3468</a>.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">What's being done?</h2>
+
+				<aside class="notes">
+					What is currently being done at the specification level to address the noted shortcomings?
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="none fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Not much.</h2>
+
+				<aside class="notes">
+					Not much. And it is not entirely clear that the problems should even be addressed at the specification level for the following reasons...
+				</aside>
+			</section>
+
+			<section class="center">
+				<ul>
+					<li class="fragment">The <strong>fragmentation</strong> problem.</li>
+					<li class="fragment">The <strong>portability</strong> problem.</li>
+ 					<li class="fragment">The <strong>versioning</strong> problem.</li>
+					<li class="fragment">The <strong>flexibility</strong> problem.</li>
+ 					<li class="fragment">The <strong>backward compatibility</strong> problem.</li>
+ 					<li class="fragment">The <strong>globals</strong> problem.</li>
+ 					<li class="fragment">The <strong>testing</strong> problem.</li>
+ 					<li class="fragment">The <strong>trust</strong> problem.</li>
+				</ul>
+
+				<aside class="notes">
+					<ul>
+						<li>
+							Updating the specification does not solve the "fragmentation" problem. Notably, even if you agree on a particular algorithm for computing e^x, asking 5 or more different vendors to implement said spec, each in their own way in accordance with their own code base and conventions increases the likelihood that at least one of them will make a mistake, thus leading to the "portability" problem.
+						</li>
+						<li>
+							The "portability" problem is exacerbated by the lack of implementation versioning. Meaning, I cannot independently specify what version of a particular vendor implementation I want in a given runtime, which may be important if I want to guarantee exact reproducibility of my results. In an "evergreen" world, each browser restart means I might have a different underlying implementation.
+						</li>
+						<li>
+							On the flip side, mandating a particular algorithm at the specification level coupled with the "versioning" problem would lead to the "flexibility" problem and a corollary "backward compatibility" problem. Currently, because vendors are not required to either use a particular algorithm or meet precision requirements, they have been free to choose algorithms which, for example, favor speed over accuracy, and because no guarantees have been made in the specification, users cannot expect or rely on consistent implementations, thus allowing vendors to avoid backward compatibility requirements when changing underlying implementations. In short, "we can change our algo and even intentionally sacrifice precision for speed because the spec allows us to." There are reasonable arguments in favor of flexibility, but the domains to which they apply are NOT numeric computing!
+						</li>
+						<li>
+							Other problems include the "globals" problem (i.e., you cannot trust that the host environment has not been hijacked by some other library), the "testing" problem (i.e., browser vendors have historically failed to rigorously test their implementations), and the "trust" problem, which underscores all the other problems.
+						</li>
+					</ul>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="none">
+				<aside class="notes">
+					<p>
+						So, here we are on our roller coaster. You may have gotten a bit excited in seeing the potential of JavaScript and your may have been inspired, imagining various creative ideas and applications, but the state of math in JavaScript may have you feeling a bit blue.
+					</p>
+					<p>
+						 But alas! Surely, there's hope! Whenever the standards bodies have let us down, the community has always risen up and pushed the boundaries of what was previously thought possible!
+					</p>
+					<p>
+						But lo! We should temper our hope for fear that the community not meet our expectations.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in" data-transition-speed="default">
+				<h2 class="no-text-transform">State of the Ecosystem</h2>
+
+				<aside class="notes">
+					Sadly, the community does not meet our expectations. And the reasons are as follows...
+				</aside>
+			</section>
+
+			<section class="center">
+				<ul>
+					<li class="fragment">False assumptions.</li>
+					<li class="fragment">Low hanging fruit.</li>
+					<li class="fragment">Poor implementations.</li>
+ 					<li class="fragment">Insufficient scope.</li>
+					<li class="fragment">Lack of ambition.</li>
+				</ul>
+
+				<aside class="notes">
+					<ul>
+						<li>
+							First, most libraries assume a good standard math library. As we already discussed, this is false. Any library which makes this assumption is at an immediate inherent disadvantage.
+						</li>
+						<li>
+							Next, much of what you see in JavaScript and on npm are the same types of libraries all addressing the same low hanging fruit (e.g., calculating the mean, variance, and standard deviation of an array), with minor differences and stylistic variations. And while the idea is fine, most people writing these libraries are either not numerically trained or simply have not done their homework as to how to write robust algorithms, which means the implementations of even the most basic functions are poor.
+						</li>
+						<li>
+							One of my basic litmus tests for any math library is how a library computes the variance. The classic definition involving the sum of squared differences is ill-suited for numeric computation due to the risk of overflow and catastrophic cancellation. Unfortunately, a majority of libraries fail this test.
+						</li>
+						<li>
+							Next, a few libraries have pushed the boundaries of what is possible. For instance, Andrew Karpathy's ConvNet.js, which does "deep learning" in a browser, or Weblas, which tries to implement BLAS algorithms via WebGL to run on graphic cards. However, these libraries are too often more proof-of-concepts than general frameworks which provide a solid foundation on top of which we can build more advanced numeric computing libraries.
+						</li>
+						<li>
+							Next, there is the work of Mikola Lysenko, who showed how the same multidimensional data structures used in NumPy, Julia, R, and MATLAB, and required for interfacing with BLAS libraries can be implemented in JavaScript (`ndarray`). However, despite this trailblazing work, the community has yet to effectively harness the concept of an ndarray within a general purpose computing framework.
+						</li>
+					</ul>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="zoom-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">A lot of noise.</h2>
+
+				<aside class="notes">
+					In short, there are glimmers of hope, but a lot of noise. And in particular, a lot of noise coming from people who lack the expertise and authority to be making noise in the first place.
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					So, the ecosystem has failed to live up to our highest hopes and aspirations. But all is not lost. People have identified all the aforementioned problems and are actively working to make numeric computing possible in JavaScript and on the web. And those people are working on a project called stdlib.
+				</aside>
+			</section>
+
+			<section id="banner" class="center" data-background-color="#000" data-transition="zoom-in" data-transition-speed="slow" data-background-transition="none">
+				<div class="row">
+					<div class="column column-12">
+						<a href=""><img src="img/stdlib.png" alt="stdlib" class="undecorated"></a>
+					</div>
+				</div>
+
+				<aside class="notes">
+					Stdlib is a standard library for JavaScript and Node.js, with an emphasis on numeric computing.
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="zoom-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">1000+ Packages</h2>
+
+				<aside class="notes">
+					Currently, the library contains 1000+ packages.
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="zoom-in fade-out" data-transition-speed="default">
+				<a href="https://github.com/stdlib-js/stdlib"><img src="img/math_packages.gif" alt="stdlib" class="undecorated"></a>
+
+				<aside class="notes">
+					<p>
+						The library contains robust algorithms for special functions, random number generation, floating-point manipulation, plotting, general utilities, and more.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="zoom-in fade-out" data-transition-speed="default">
+				<a href="https://github.com/stdlib-js/stdlib"><img src="img/prng_packages.gif" alt="stdlib" class="undecorated"></a>
+
+				<aside class="notes">
+					Additionally, the project has an extensive and growing list of PRNGs.
+				</aside>
+			</section>
+
+			<section class="center" data-transition="zoom-in fade-out" data-transition-speed="default">
+				<a href="https://github.com/stdlib-js/stdlib"><img src="img/repl_help.gif" alt="stdlib" class="undecorated"></a>
+
+				<aside class="notes">
+					<p>
+						The project leverages the Node.js REPL to create a REPL environment, which includes integrated REPL help docs.
+					</p>
+					<p>
+						Here, I am displaying wrappers for BLAS implementations, which are written in both JavaScript and in native C and Fortran.
+					</p>
+					<p>
+						I should also note that the library has WebAssembly/asm.js implementations to enable high-performance numeric computing in web browsers.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center" data-transition="zoom-in fade-out" data-transition-speed="default">
+				<a href="https://github.com/stdlib-js/stdlib"><img src="img/repl_example.gif" alt="stdlib" class="undecorated"></a>
+
+				<aside class="notes">
+					Similar to the R REPL, you can easily run REPL examples and modify them accordingly.
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">A standard library.</h2>
+
+				<aside class="notes">
+					Basically, the library contains many of the essential ingredients needed to build higher-level data structures and more advanced algorithms for machine learning, statistics, and artificial intelligence.
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="zoom-in fade-out" data-transition-speed="default">
+				<a href="https://github.com/stdlib-js/stdlib"><img src="img/bib_database.gif" alt="stdlib" class="undecorated"></a>
+
+				<aside class="notes">
+					And for those worried that I am one of the false prophets I referred to earlier, the project comes with an integrated bibliographic database we use to cite primary sources and has extensive testing against reference implementations found in Python, Julia, and R.
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					So, hopefully, at this point, you're excited. I know I am. :)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">So what's needed?</h2>
+
+				<aside class="notes">
+					So what's needed?
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Your help.</h2>
+
+				<aside class="notes">
+					<p>
+						What is needed is your help. Your help is needed to help write robust, performant code. Your help is needed to implement and test algorithms. Your help is needed to make JavaScript a first-class computing language.
+					</p>
+					<p>
+						As I have alluded to, the road has been long and rocky, but, hopefully, I have shown a light at the end of the tunnel. And hopefully, you'll help us get there.
+					</p>
+				</aside>
+			</section>
+
+			<section class="center">
+				<aside class="notes">
+					(next slide)
+				</aside>
+			</section>
+
+			<section class="center" data-transition="fade-in fade-out" data-transition-speed="default">
+				<h2 class="no-text-transform">Thank you!</h2>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="center">
+				<div>
+					<a href="https://github.com/stdlib-js/stdlib"><img src="img/hex_sticker_black.svg" alt="stdlib" class="undecorated"></a>
+				</div>
+
+				<p>
+					<small><a href="https://github.com/stdlib-js/stdlib"><i class="fa fa-github"></i> https://github.com/stdlib-js/stdlib</a></small>
+					<br>
+					<small><a href="https://www.patreon.com/athan"><i class="fa fa-bitcoin"></i> https://www.patreon.com/athan</a></small>
+				</p>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section>
+				<!-- Add blank slide to separate main presentation from appendix -->
+				<aside class="notes">
+					Intentionally left blank.
+				</aside>
+			</section>
+
+			<section class="center">
+				<h2>Appendix</h2>
+			</section>
+
+			<section class="center">
+				<!-- Intentionally many lines -->
+				<pre><code class="hljs javascript" contenteditable>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				</code></pre>
+				<aside class="notes">
+					Slide for code editing.
+				</aside>
+			</section>
+
+			<!-- <section class="center">
+				<h2>Heading</h2>
+			</section> -->
+
+			<section class="center">
+				<h2>The End</h2>
+			</section>
+
+		</div>
+
+	</div>
+
+	<footer>
+		<a href="https://github.com/kgryte"><i class="fa fa-github"></i> Athan Reines</a> | <a href="https://twitter.com/kgryte"><i class="fa fa-twitter"></i> @kgryte</a> | <a href="https://twitter.com/stdlibjs"><i class="fa fa-twitter"></i> @stdlibjs</a>
+	</footer>
+
+	<script src="js/lib/reveal/head.min.js"></script>
+	<script src="js/lib/reveal/reveal.js"></script>
+	<script src="js/lib/reveal/init.js"></script>
+	<script src="js/script.js"></script>
+</body>
+</html>

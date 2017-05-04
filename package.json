@@ -1,0 +1,43 @@
+{
+  "name": "talk-sfnode-may-2017",
+  "version": "0.0.0",
+  "description": "Talk for SFNode (May, 2017).",
+  "author": {
+    "name": "Athan Reines",
+    "email": "kgryte@gmail.com"
+  },
+  "contributors": [
+    {
+      "name": "Athan Reines",
+      "email": "kgryte@gmail.com"
+    }
+  ],
+  "scripts": {},
+  "main": "",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kgryte/talks-sfnode-may-2017.git"
+  },
+  "keywords": [
+		"talk",
+		"slides",
+		"presentation",
+    "sfnode",
+    "math",
+    "mathematics",
+    "numeric computing",
+    "javascript",
+    "js",
+    "nodejs",
+    "node"
+	],
+  "bugs": {
+    "url": "https://github.com/kgryte/talks-sfnode-may-2017/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "jshint": "2.x.x",
+    "jshint-stylish": "2.x.x"
+  },
+  "license": ""
+}
